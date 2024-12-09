@@ -1,4 +1,4 @@
-# TSV Data Viewer with PyScript
+# Movie Recommendation | PyScript
 
 This project demonstrates how to load and display data from a TSV file using [PyScript](https://pyscript.net/), a framework that enables Python to run in the browser. The entire logic is client-side, making it suitable for hosting on static sites (only tested on GitHub Pages).
 
@@ -9,5 +9,3 @@ This project demonstrates how to load and display data from a TSV file using [Py
 ## Live Demo
 
 <iframe src="https://shalinir8.github.io/movie-recommendation-1/" width="100%" height="500"></iframe>
-
-If the iframe above does not load, click [here](https://<username>.github.io/<repository-name>/) to view the live demo.

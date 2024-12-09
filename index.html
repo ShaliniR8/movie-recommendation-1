@@ -3,59 +3,175 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Test</title>
+    <title>Movie Recommendation System</title>
+    <link rel="stylesheet" href="./static/css/style.css" />
     <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
     <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+
+    <style>
+        .pagination {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .pagination button.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
-    <h1>Display TSV Data with PyScript</h1>
-    <p>This table is generated from a TSV file using Python code running in the browser.</p>
+    <a href="recommendations.html" class="next-button">Next</a>
+    <div class="table-container">
+        <h2>File.tsv Table</h2>
+        <div id="file-table"></div>
+        <div class="pagination" id="file-pagination"></div>
+    </div>
+
+    <div class="table-container">
+        <h2>Movie_Id_Titles.csv Table</h2>
+        <div id="movie-table"></div>
+        <div class="pagination" id="movie-pagination"></div>
+    </div>
 
     <py-script>
         import asyncio, pyodide
-
-        async def load_tsv(file_path: str):
+        import csv
+        from io import StringIO
+        
+        async def load_file(file_path: str):
+            # Fetch file content
             response = await pyodide.http.pyfetch(file_path)
-            text = (await response.bytes()).decode("utf-8") # Decode the response bytes to a UTF-8 string to handle the raw text wich we can decode properly
-
-            lines = text.strip().split("\n")
-            rows = [line.split("\t") for line in lines]
+            text = (await response.bytes()).decode("utf-8")
+            
+            # Determine the delimiter (tab or comma)
+            delimiter = "\t" if "\t" in text else ","
+            
+            # Use csv.reader to handle quoted strings properly
+            csv_reader = csv.reader(StringIO(text), delimiter=delimiter)
+            
+            # Convert csv.reader output to a list of rows
+            rows = list(csv_reader)
             return rows
 
-        tsv_data = await load_tsv("file.tsv")
+        def render_table(data, table_id, pagination_id, rows_per_page=10):
+            from js import document
 
-        from js import document
-        table = document.createElement("table")
-        table.border = "1"
-        table.style.borderCollapse = "collapse"
-        table.style.marginTop = "20px"
+            table_div = document.getElementById(table_id)
+            pagination_div = document.getElementById(pagination_id)
 
-        header_row = ["user_id", "item_id", "rating", "timestamp"]
+            current_page = 1
+            total_pages = (len(data) - 1 + rows_per_page - 1) // rows_per_page  # Header row not counted
+            visible_start = 1  # First visible page button
 
-        thead = document.createElement("thead")
-        tr_head = document.createElement("tr")
-        for header_cell in header_row:
-            th = document.createElement("th")
-            th.innerText = header_cell
-            th.style.padding = "5px"
-            tr_head.appendChild(th)
-        thead.appendChild(tr_head)
-        table.appendChild(thead)
+            def render_page():
+                # Clear table and pagination content
+                table_div.innerHTML = ""
+                pagination_div.innerHTML = ""
 
-        tbody = document.createElement("tbody")
-        for row_data in tsv_data:
-            tr = document.createElement("tr")
-            for cell_data in row_data:
-                td = document.createElement("td")
-                td.innerText = cell_data
-                td.style.padding = "5px"
-                tr.appendChild(td)
-            tbody.appendChild(tr)
+                # Render the table
+                table = document.createElement("table")
+                header_row = document.createElement("tr")
+                for header in data[0]:  # First row is the header
+                    th = document.createElement("th")
+                    th.innerText = header
+                    header_row.appendChild(th)
+                table.appendChild(header_row)
 
-        table.appendChild(tbody)
+                start = (current_page - 1) * rows_per_page + 1
+                end = min(start + rows_per_page - 1, len(data))
+                for row_data in data[start:end]:
+                    row = document.createElement("tr")
+                    for cell_data in row_data:
+                        td = document.createElement("td")
+                        td.innerText = cell_data
+                        row.appendChild(td)
+                    table.appendChild(row)
 
-        document.body.appendChild(table)
-        None
+                table_div.appendChild(table)
+
+                # Render pagination buttons
+                create_pagination_buttons()
+
+            def create_pagination_buttons():
+                nonlocal visible_start
+
+                # Add "Prev" buttons
+                if visible_start > 1:
+                    add_button("First", lambda: show_first())
+                    add_button("<<", lambda: show_prev_5())
+                    add_button("<", lambda: show_prev())
+
+                # Add visible page buttons
+                for page in range(visible_start, min(visible_start + 5, total_pages + 1)):
+                    button = document.createElement("button")
+                    button.innerText = str(page)
+                    if page == current_page:
+                        button.classList.add("disabled")
+                    else:
+                        button.onclick = lambda event, p=page: set_page(p)
+                    pagination_div.appendChild(button)
+
+                # Add "Next" buttons
+                if visible_start + 5 <= total_pages:
+                    add_button(">", lambda: show_next())
+                    add_button(">>", lambda: show_next_5())
+                    add_button("Last", lambda: show_last())
+
+            def add_button(label, callback):
+                button = document.createElement("button")
+                button.innerText = label
+                button.onclick = lambda event: callback()
+                pagination_div.appendChild(button)
+
+            def set_page(page):
+                nonlocal current_page
+                current_page = page
+                render_page()
+
+            def show_next():
+                set_page(current_page + 1)
+
+            def show_prev():
+                set_page(current_page - 1)
+
+            def show_next_5():
+                nonlocal visible_start
+                visible_start += 5
+                set_page(visible_start)
+
+            def show_prev_5():
+                nonlocal visible_start
+                visible_start -= 5
+                set_page(visible_start)
+
+            def show_first():
+                nonlocal visible_start
+                visible_start = 1
+                set_page(1)
+
+            def show_last():
+                nonlocal visible_start
+                visible_start = max(total_pages - 4, 1)
+                set_page(total_pages)
+
+            render_page()
+
+        file_data = await load_file("file.tsv")
+        file_data.insert(0, ["user_id","item_id","rating","timestamp"])
+        render_table(file_data, "file-table", "file-pagination")
+
+        movie_data = await load_file("Movie_Id_Titles.csv")
+        render_table(movie_data, "movie-table", "movie-pagination")
     </py-script>
 </body>
 </html>

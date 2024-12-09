@@ -1,36 +1,77 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
-import matplotlib.pyplot as plt 
+import numpy as np
+from sklearn.decomposition import TruncatedSVD
+from joblib import dump
 
-column_names=["user_id","item_id","rating","timestamp"]
-df=pd.read_csv("file.tsv",sep='\t',names=column_names)
+def load_data(interaction_file, movies_file):
+    """Load interaction and movie mapping data."""
+    # Define column names for the TSV and CSV files
+    interaction_columns = ["user_id", "item_id", "rating", "timestamp"]
+    movie_columns = ["movie_id", "movie_name"]
 
-movie_titles=pd.read_csv("Movie_Id_Titles.csv")
-data=pd.merge(df,movie_titles,on="item_id")
-data=data.drop(["timestamp"],axis=1)
+    # Load the files with the defined column names
+    interactions = pd.read_csv(interaction_file, sep="\t", names=interaction_columns)
+    movies = pd.read_csv(movies_file, names=movie_columns)
+    return interactions, movies
 
-#group movies by title and calculate the mean of the ratings for a movie
-#data.groupby("title")["rating"].mean().sort_values(ascending=True)
+def preprocess_data(interactions, movies):
+    """Preprocess data for training."""
+    # Ensure consistent data types for merging
+    interactions['item_id'] = interactions['item_id'].astype(str)
+    movies['movie_id'] = movies['movie_id'].astype(str)
 
-#group movies title and count number of ratings received by the movie
-#data.groupby("title")["rating"].count().sort_values(ascending=True)
+    # Merge interactions with movie names for interpretability
+    interactions = interactions.merge(movies, left_on="item_id", right_on="movie_id", how="left")
 
-ratings=pd.DataFrame(data.groupby("title")["rating"].mean())
-ratings["No. of ratings"]=pd.DataFrame(data.groupby("title")["rating"].count())
+    # Create a user-item matrix
+    user_item_matrix = interactions.pivot_table(index="user_id", columns="item_id", values="rating", fill_value=0)
+    return user_item_matrix
 
-plt.figure(figsize=(10,4))
-plt.title("Rating count",loc="right")
-ratings["No. of ratings"].hist(bins=70)
 
-plt.figure(figsize=(10,4))
-plt.title("Mean Rating",loc="left")
-ratings["rating"].hist(bins=70)
+def train_model(user_item_matrix, n_components=50):
+    """Train a recommendation model using SVD."""
+    # Decompose the user-item matrix
+    svd = TruncatedSVD(n_components=n_components, random_state=42)
+    svd.fit(user_item_matrix)
+    return svd
 
-#finding correlation
-moviemat=pd.pivot_table(data,index="user_id",columns="title",values="rating",)
-seconds_1994_ratings=moviemat['8 Seconds (1994)']
-similar_seconds_1994_ratings=moviemat.corrwith(seconds_1994_ratings)
+def save_mappings(user_item_matrix, movies, model, model_path="model.pkl"):
+    """Save model and mappings for later use."""
+    # Save the model
+    dump(model, model_path)
 
-corr_seconds=pd.DataFrame(similar_seconds_1994_ratings,columns=["Correlation"])
-#corr_seconds.dropna()
+    import base64
+
+    # Encode the model.pkl file to Base64
+    with open("model.pkl", "rb") as file:
+        encoded_model = base64.b64encode(file.read()).decode("utf-8")
+
+    # Save the Base64 string to a text file
+    with open("model_base64.txt", "w") as out_file:
+        out_file.write(encoded_model)
+
+    # Save mappings for reverse lookup
+    user_mapping = pd.DataFrame({"user_id": user_item_matrix.index}).reset_index()
+    movie_mapping = movies[["movie_id", "movie_name"]]
+    user_mapping.to_csv("users_mapping.csv", index=False)
+    movie_mapping.to_csv("movies_mapping.csv", index=False)
+
+def main():
+    interaction_file = "file.tsv"
+    movies_file = "Movie_Id_Titles.csv"
+
+    # Load and preprocess data
+    interactions, movies = load_data(interaction_file, movies_file)
+    user_item_matrix = preprocess_data(interactions, movies)
+
+    # Train the model
+    print("Training the model...")
+    model = train_model(user_item_matrix)
+    
+    # Save the model and mappings
+    print("Saving the model and mappings...")
+    save_mappings(user_item_matrix, movies, model)
+    print("All files saved successfully.")
+
+if __name__ == "__main__":
+    main()
