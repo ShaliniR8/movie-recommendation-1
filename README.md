@@ -8,6 +8,6 @@ This project demonstrates how to load and display data from a TSV file using [Py
 
 ## Live Demo
 
-<iframe src="https://<username>.github.io/<repository-name>/" width="100%" height="500"></iframe>
+<iframe src="https://shalinir8.github.io/movie-recommendation-1/" width="100%" height="500"></iframe>
 
 If the iframe above does not load, click [here](https://<username>.github.io/<repository-name>/) to view the live demo.
