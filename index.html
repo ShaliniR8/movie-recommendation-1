@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Test</title>
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+</head>
+<body>
+    <h1>Display TSV Data with PyScript</h1>
+    <p>This table is generated from a TSV file using Python code running in the browser.</p>
+
+    <py-script>
+        import asyncio, pyodide
+
+        async def load_tsv(file_path: str):
+            response = await pyodide.http.pyfetch(file_path)
+            text = (await response.bytes()).decode("utf-8") # Decode the response bytes to a UTF-8 string to handle the raw text wich we can decode properly
+
+            lines = text.strip().split("\n")
+            rows = [line.split("\t") for line in lines]
+            return rows
+
+        tsv_data = await load_tsv("file.tsv")
+
+        from js import document
+        table = document.createElement("table")
+        table.border = "1"
+        table.style.borderCollapse = "collapse"
+        table.style.marginTop = "20px"
+
+        header_row = ["user_id", "item_id", "rating", "timestamp"]
+
+        thead = document.createElement("thead")
+        tr_head = document.createElement("tr")
+        for header_cell in header_row:
+            th = document.createElement("th")
+            th.innerText = header_cell
+            th.style.padding = "5px"
+            tr_head.appendChild(th)
+        thead.appendChild(tr_head)
+        table.appendChild(thead)
+
+        tbody = document.createElement("tbody")
+        for row_data in tsv_data:
+            tr = document.createElement("tr")
+            for cell_data in row_data:
+                td = document.createElement("td")
+                td.innerText = cell_data
+                td.style.padding = "5px"
+                tr.appendChild(td)
+            tbody.appendChild(tr)
+
+        table.appendChild(tbody)
+
+        document.body.appendChild(table)
+        None
+    </py-script>
+</body>
+</html>
