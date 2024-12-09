@@ -1,0 +1,11 @@
+name = "Fractals with Numpy and Canvas"
+description = "Render Fractals using Numpy, Canvas in Pyscript."
+packages = ["numpy", "sympy"]
+
+[files]
+"./palettes.py" = ""
+"./fractals.py" = ""
+
+[[fetch]]
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/feat/exp/model.pkl"
+name = "Movie Predictions"
