@@ -7,7 +7,4 @@ This project demonstrates how to load and display data from a TSV file using [Py
 - Hosted on GitHub Pages, ensuring easy accessibility and no backend server requirements.
 
 ## Live Demo
-
-<iframe src="https://shalinir8.github.io/movie-recommendation-1/" width="100%" height="500"></iframe>
-
-If the iframe above does not load, click [here](https://<username>.github.io/<repository-name>/) to view the live demo.
+Click [here](https://<username>.github.io/<repository-name>/) to view the live demo.
