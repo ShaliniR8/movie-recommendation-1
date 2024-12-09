@@ -12,18 +12,16 @@
     <p>This table is generated from a TSV file using Python code running in the browser.</p>
 
     <py-script>
-        import asyncio
-        import pyodide
+        import asyncio, pyodide
 
         async def load_tsv(file_path: str):
             response = await pyodide.http.pyfetch(file_path)
-            text = await response.text()
+            text = (await response.bytes()).decode("utf-8") # Decode the response bytes to a UTF-8 string to handle the raw text wich we can decode properly
 
             lines = text.strip().split("\n")
             rows = [line.split("\t") for line in lines]
             return rows
 
-        # file.tsv is in the path of index.html 
         tsv_data = await load_tsv("file.tsv")
 
         from js import document
@@ -32,7 +30,7 @@
         table.style.borderCollapse = "collapse"
         table.style.marginTop = "20px"
 
-        header_row = ["user_id","item_id","rating","timestamp"]
+        header_row = ["user_id", "item_id", "rating", "timestamp"]
 
         thead = document.createElement("thead")
         tr_head = document.createElement("tr")
