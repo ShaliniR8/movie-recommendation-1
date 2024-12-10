@@ -91,13 +91,14 @@
                 start = (current_page - 1) * rows_per_page + 1
                 end = min(start + rows_per_page - 1, len(data))
                 for row_data in data[start:end]:
+                    item_id = row_data[0]
                     row = document.createElement("tr")
                     for i, cell_data in enumerate(row_data):
                         td = document.createElement("td")
                         if i == 1:  # Movie Name Column (index 1)
                             # Create hyperlink
                             link = document.createElement("a")
-                            link.href = f"recommendations.html?movie={cell_data}"
+                            link.href = f"recommendations.html?movie={item_id}"
                             link.innerText = cell_data
                             td.appendChild(link)
                         else:
