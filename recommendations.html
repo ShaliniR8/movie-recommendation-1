@@ -16,19 +16,31 @@
     <body>
 
         <section class="pyscript">
-            <form id="recommendation-form">
-                <label for="movie-input">Enter a movie you like:</label>
-                <input type="text" id="movie-input" name="movie-input" required />
-                <button type="button">Get Recommendations</button>
-            </form>
+            <!-- Would be nice to have the name of the movie here -->
+
+            <div id="predicted_rating">
+                <p></p>
+            </div>
 
             <div id="recommendations">
                 <h2>Recommended Movies:</h2>
                 <ul id="recommendation-list"></ul>
             </div>
+
+            <template id="list-item-template">
+                <li>
+                    <p></p>
+                </li>
+            </template>
+            
+            <template id="rating-template">
+                <p></p>
+            </template>
             <script type="py" src="./main.py" config="./pyscript.toml"></script>
         </section>
 
     </body>
+
+    
 
 </html>
