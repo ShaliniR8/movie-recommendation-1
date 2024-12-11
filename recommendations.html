@@ -8,39 +8,71 @@
         <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
         <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
-        <title>Fractals with NumPy and canvas</title>
-        <link rel="icon" type="image/png" href="./assets/favicon.png" />
+        <title>Movie Recommendation System</title>
 
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f4f4f4;
+            }
+            h1, h2 {
+                color: #333;
+            }
+            #predicted_rating {
+                margin-bottom: 20px;
+                font-size: 1.2em;
+            }
+            ul {
+                list-style-type: none;
+                padding: 0;
+            }
+            li {
+                background: #fff;
+                margin: 5px 0;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                display: flex;
+                align-items: center;
+            }
+            .movie-poster {
+                width: 50px;
+                height: 75px;
+                object-fit: cover;
+                margin-right: 15px;
+                border-radius: 3px;
+            }
+            .error {
+                color: red;
+            }
+        </style>
     </head>
 
     <body>
+        <h1>Movie Recommendation System</h1>
 
-        <section class="pyscript">
-            <!-- Would be nice to have the name of the movie here -->
+        <div id="predicted_rating">
+            <p></p>
+        </div>
 
-            <div id="predicted_rating">
+        <div id="recommendations">
+            <h2>Recommended Movies:</h2>
+            <ul id="recommendation-list"></ul>
+        </div>
+
+        <div id="user-recommendations-section">
+            <h2>Movies Liked by People who liked this Movie:</h2>
+            <ul id="user-recommendation-list"></ul>
+        </div>
+
+        <div id="list-item-template" style="display:none">
+            <li>
+                <img src="" alt="Movie Poster" class="movie-poster">
                 <p></p>
-            </div>
-
-            <div id="recommendations">
-                <h2>Recommended Movies:</h2>
-                <ul id="recommendation-list"></ul>
-            </div>
-
-            <template id="list-item-template">
-                <li>
-                    <p></p>
-                </li>
-            </template>
-            
-            <template id="rating-template">
-                <p></p>
-            </template>
-            <script type="py" src="./main.py" config="./pyscript.toml"></script>
-        </section>
-
+            </li>
+        </div>
+        
+        <script type="py" src="./main.py" config="./pyscript.toml"></script>
     </body>
-
-    
-
 </html>
