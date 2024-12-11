@@ -30,12 +30,11 @@
     </style>
 </head>
 <body>
-    <a href="recommendations.html" class="next-button">Next</a>
-    <div class="table-container">
+    <!-- <div class="table-container">
         <h2>File.tsv Table</h2>
         <div id="file-table"></div>
         <div class="pagination" id="file-pagination"></div>
-    </div>
+    </div> -->
 
     <div class="table-container">
         <h2>Movie_Id_Titles.csv Table</h2>
@@ -237,9 +236,9 @@
 
             render_page()
 
-        file_data = await load_file("./datasets/file.tsv")
+        <!-- file_data = await load_file("./datasets/file.tsv")
         file_data.insert(0, ["user_id","item_id","rating","timestamp"])
-        render_table(file_data, "file-table", "file-pagination")
+        render_table(file_data, "file-table", "file-pagination") -->
 
         movie_data = await load_file("./datasets/Movie_Id_Titles.csv")
         render_table(movie_data, "movie-table", "movie-pagination")
