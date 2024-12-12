@@ -6,53 +6,20 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
         <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+        <link rel="stylesheet" href="static/css/style2.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
         <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
         <title>Movie Recommendation System</title>
-
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background-color: #f4f4f4;
-            }
-            h1, h2 {
-                color: #333;
-            }
-            #predicted_rating {
-                margin-bottom: 20px;
-                font-size: 1.2em;
-            }
-            ul {
-                list-style-type: none;
-                padding: 0;
-            }
-            li {
-                background: #fff;
-                margin: 5px 0;
-                padding: 10px;
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                display: flex;
-                align-items: center;
-            }
-            .movie-poster {
-                width: 50px;
-                height: 75px;
-                object-fit: cover;
-                margin-right: 15px;
-                border-radius: 3px;
-            }
-            .error {
-                color: red;
-            }
-        </style>
     </head>
 
     <body>
+        <button class="toggle-mode" onclick="toggleMode()">Toggle Dark Mode</button>
         <h1>Movie Recommendation System</h1>
 
-        <div id="predicted_rating">
+        <div id="loading">Loading...</div>
+
+        <div id="predicted_rating" class="gradient-box">
             <p></p>
         </div>
 
@@ -74,5 +41,11 @@
         </div>
         
         <script type="py" src="./main.py" config="./pyscript.toml"></script>
+
+        <script>
+            function toggleMode() {
+                document.body.classList.toggle('dark-mode');
+            }
+        </script>
     </body>
 </html>

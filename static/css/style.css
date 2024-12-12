@@ -1,11 +1,17 @@
-
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin: 20px;
-    background-color: #f9f9f9;
+    background: linear-gradient(135deg, #f3f4f6, #e2e8f0);
+    transition: background-color 0.3s;
 }
 
-h1, h2 {
+h1 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 2.5rem;
+    color: #FF5722;
+    text-shadow: 2px 2px 0 #FFD54F;
+}
+h2 {
     color: #4CAF50;
 }
 
@@ -55,3 +61,4 @@ tr:hover {
 .next-button:hover {
     background-color: #45a049;
 }
+

@@ -20,14 +20,10 @@ data = pd.read_csv('Movie_Id_Titles_Enhanced.csv')
 predicted_rating_div = pydom["#predicted_rating"][0]
 recommendation_list = document.querySelector("#recommendation-list")
 user_recommendation_list = document.querySelector("#user-recommendation-list")
-
+loading = document.querySelector("#loading")
 item_template = document.querySelector("#list-item-template li")
 
 def fetch_movie_data():
-    """
-    Fetch movie data based on the 'movie' parameter from the URL.
-    Returns a dictionary with relevant data or an error message.
-    """
     url_params = js.window.location.search
     params = dict(x.split('=') for x in url_params.lstrip('?').split('&') if '=' in x)
     movie_id = decodeURIComponent(params.get("movie", ""))
@@ -98,7 +94,6 @@ def add_user_recommendation(movie):
     user_recommendation_list.append(cloned_li)
 
 async def display_results():
-    """Fetch and display movie data based on URL parameters."""
     movie_data = fetch_movie_data()
 
     if "error" in movie_data:
@@ -116,6 +111,7 @@ async def display_results():
         error_div.create("p", html=error_content)
         predicted_rating_div.append(error_div)
 
+    loading.innerHTML = ""
     similar_movies = recommend_similar_movies(movie_title)
     console.log(f"Similar Movies: {similar_movies}")
     if isinstance(similar_movies, list):
