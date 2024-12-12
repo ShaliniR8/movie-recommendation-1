@@ -6,29 +6,46 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
         <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+        <link rel="stylesheet" href="static/css/style2.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
         <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
-        <title>Fractals with NumPy and canvas</title>
-        <link rel="icon" type="image/png" href="./assets/favicon.png" />
-
+        <title>Movie Recommendation System</title>
     </head>
 
     <body>
+        <button class="toggle-mode" onclick="toggleMode()">Toggle Dark Mode</button>
+        <h1>Movie Recommendation System</h1>
 
-        <section class="pyscript">
-            <form id="recommendation-form">
-                <label for="movie-input">Enter a movie you like:</label>
-                <input type="text" id="movie-input" name="movie-input" required />
-                <button type="button">Get Recommendations</button>
-            </form>
+        <div id="loading">Loading...</div>
 
-            <div id="recommendations">
-                <h2>Recommended Movies:</h2>
-                <ul id="recommendation-list"></ul>
-            </div>
-            <script type="py" src="./main.py" config="./pyscript.toml"></script>
-        </section>
+        <div id="predicted_rating" class="gradient-box">
+            <p></p>
+        </div>
 
+        <div id="recommendations">
+            <h2>Recommended Movies:</h2>
+            <ul id="recommendation-list"></ul>
+        </div>
+
+        <div id="user-recommendations-section">
+            <h2>Movies Liked by People who liked this Movie:</h2>
+            <ul id="user-recommendation-list"></ul>
+        </div>
+
+        <div id="list-item-template" style="display:none">
+            <li>
+                <img src="" alt="Movie Poster" class="movie-poster">
+                <p></p>
+            </li>
+        </div>
+        
+        <script type="py" src="./main.py" config="./pyscript.toml"></script>
+
+        <script>
+            function toggleMode() {
+                document.body.classList.toggle('dark-mode');
+            }
+        </script>
     </body>
-
 </html>

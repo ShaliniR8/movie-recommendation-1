@@ -1,11 +1,13 @@
-name = "Fractals with Numpy and Canvas"
-description = "Render Fractals using Numpy, Canvas in Pyscript."
-packages = ["numpy", "sympy"]
-
+packages = ["numpy", "sympy", "scikit-learn", "pandas"]
 [files]
-"./palettes.py" = ""
-"./fractals.py" = ""
-
+"./predictions.py" = ""
 [[fetch]]
-from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/feat/exp/model.pkl"
-name = "Movie Predictions"
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/refs/heads/feat/exp/datasets/Movie_Id_Titles_Enhanced.csv"
+[[fetch]]
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/refs/heads/feat/exp/datasets/movie_similarity.csv"
+[[fetch]]
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/refs/heads/feat/exp/datasets/user_similarity.csv"
+[[fetch]]
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/refs/heads/feat/exp/datasets/ratings_summary.csv"
+[[fetch]]
+from = "https://raw.githubusercontent.com/ShaliniR8/movie-recommendation-1/refs/heads/feat/exp/datasets/ratings_with_movies.csv"

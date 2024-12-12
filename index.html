@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Recommendation System</title>
-    <link rel="stylesheet" href="./static/css/style.css" />
-    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-
+    <link rel="stylesheet" href="./static/css/style.css">
     <style>
+        h1 {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 2.5rem;
+            color: #22ff5d;
+            text-shadow: 2px 2px 0 #210761;
+        }
         .pagination {
             text-align: center;
             margin: 10px 0;
@@ -30,148 +33,144 @@
     </style>
 </head>
 <body>
-    <a href="recommendations.html" class="next-button">Next</a>
     <div class="table-container">
-        <h2>File.tsv Table</h2>
-        <div id="file-table"></div>
-        <div class="pagination" id="file-pagination"></div>
-    </div>
-
-    <div class="table-container">
-        <h2>Movie_Id_Titles.csv Table</h2>
+        <h1>Movie Recommendation System</h1>
         <div id="movie-table"></div>
         <div class="pagination" id="movie-pagination"></div>
     </div>
 
-    <py-script>
-        import asyncio, pyodide
-        import csv
-        from io import StringIO
-        
-        async def load_file(file_path: str):
-            # Fetch file content
-            response = await pyodide.http.pyfetch(file_path)
-            text = (await response.bytes()).decode("utf-8")
-            
-            # Determine the delimiter (tab or comma)
-            delimiter = "\t" if "\t" in text else ","
-            
-            # Use csv.reader to handle quoted strings properly
-            csv_reader = csv.reader(StringIO(text), delimiter=delimiter)
-            
-            # Convert csv.reader output to a list of rows
-            rows = list(csv_reader)
-            return rows
+    <script>
+        function toggleMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+        async function loadCSV(filePath) {
+            const response = await fetch(filePath);
+            const text = await response.text();
+            const rows = Papa.parse(text, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            }).data;
+            return rows;
+        }
 
-        def render_table(data, table_id, pagination_id, rows_per_page=10):
-            from js import document
+        function renderTable(data, tableId, paginationId, rowsPerPage = 10) {
+            const tableDiv = document.getElementById(tableId);
+            const paginationDiv = document.getElementById(paginationId);
+            let currentPage = 1;
+            const totalPages = Math.ceil(data.length / rowsPerPage);
+            let visibleStart = 1;
 
-            table_div = document.getElementById(table_id)
-            pagination_div = document.getElementById(pagination_id)
+            function renderPage() {
+                tableDiv.innerHTML = '';
+                paginationDiv.innerHTML = '';
 
-            current_page = 1
-            total_pages = (len(data) - 1 + rows_per_page - 1) // rows_per_page  # Header row not counted
-            visible_start = 1  # First visible page button
+                const table = document.createElement('table');
+                const headerRow = document.createElement('tr');
+                const headers = ['item_id', 'title', 'overview', 'production_companies', 'origin_country', 'genres'];
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.innerText = header;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
 
-            def render_page():
-                # Clear table and pagination content
-                table_div.innerHTML = ""
-                pagination_div.innerHTML = ""
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = Math.min(start + rowsPerPage, data.length);
+                for (let i = start; i < end; i++) {
+                    const row = document.createElement('tr');
+                    headers.forEach(header => {
+                        const td = document.createElement('td');
+                        if (header === 'title') {
+                            const link = document.createElement('a');
+                            link.href = `recommendations.html?movie=${data[i]['item_id']}`;
+                            link.innerText = data[i][header];
+                            td.appendChild(link);
+                        } else {
+                            td.innerText = data[i][header];
+                        }
+                        row.appendChild(td);
+                    });
+                    table.appendChild(row);
+                }
 
-                # Render the table
-                table = document.createElement("table")
-                header_row = document.createElement("tr")
-                for header in data[0]:  # First row is the header
-                    th = document.createElement("th")
-                    th.innerText = header
-                    header_row.appendChild(th)
-                table.appendChild(header_row)
+                tableDiv.appendChild(table);
+                createPaginationButtons();
+            }
 
-                start = (current_page - 1) * rows_per_page + 1
-                end = min(start + rows_per_page - 1, len(data))
-                for row_data in data[start:end]:
-                    row = document.createElement("tr")
-                    for cell_data in row_data:
-                        td = document.createElement("td")
-                        td.innerText = cell_data
-                        row.appendChild(td)
-                    table.appendChild(row)
+            function createPaginationButtons() {
+                if (visibleStart > 1) {
+                    addButton('First', showFirst);
+                    addButton('<<', showPrev5);
+                    addButton('<', showPrev);
+                }
 
-                table_div.appendChild(table)
+                for (let page = visibleStart; page < Math.min(visibleStart + 5, totalPages + 1); page++) {
+                    const button = document.createElement('button');
+                    button.innerText = page;
+                    if (page === currentPage) {
+                        button.classList.add('disabled');
+                    } else {
+                        button.onclick = () => setPage(page);
+                    }
+                    paginationDiv.appendChild(button);
+                }
 
-                # Render pagination buttons
-                create_pagination_buttons()
+                if (visibleStart + 5 <= totalPages) {
+                    addButton('>', showNext);
+                    addButton('>>', showNext5);
+                    addButton('Last', showLast);
+                }
+            }
 
-            def create_pagination_buttons():
-                nonlocal visible_start
+            function addButton(label, callback) {
+                const button = document.createElement('button');
+                button.innerText = label;
+                button.onclick = callback;
+                paginationDiv.appendChild(button);
+            }
 
-                # Add "Prev" buttons
-                if visible_start > 1:
-                    add_button("First", lambda: show_first())
-                    add_button("<<", lambda: show_prev_5())
-                    add_button("<", lambda: show_prev())
+            function setPage(page) {
+                currentPage = page;
+                renderPage();
+            }
 
-                # Add visible page buttons
-                for page in range(visible_start, min(visible_start + 5, total_pages + 1)):
-                    button = document.createElement("button")
-                    button.innerText = str(page)
-                    if page == current_page:
-                        button.classList.add("disabled")
-                    else:
-                        button.onclick = lambda event, p=page: set_page(p)
-                    pagination_div.appendChild(button)
+            function showNext() {
+                setPage(currentPage + 1);
+            }
 
-                # Add "Next" buttons
-                if visible_start + 5 <= total_pages:
-                    add_button(">", lambda: show_next())
-                    add_button(">>", lambda: show_next_5())
-                    add_button("Last", lambda: show_last())
+            function showPrev() {
+                setPage(currentPage - 1);
+            }
 
-            def add_button(label, callback):
-                button = document.createElement("button")
-                button.innerText = label
-                button.onclick = lambda event: callback()
-                pagination_div.appendChild(button)
+            function showNext5() {
+                visibleStart += 5;
+                setPage(visibleStart);
+            }
 
-            def set_page(page):
-                nonlocal current_page
-                current_page = page
-                render_page()
+            function showPrev5() {
+                visibleStart -= 5;
+                setPage(visibleStart);
+            }
 
-            def show_next():
-                set_page(current_page + 1)
+            function showFirst() {
+                visibleStart = 1;
+                setPage(1);
+            }
 
-            def show_prev():
-                set_page(current_page - 1)
+            function showLast() {
+                visibleStart = Math.max(totalPages - 4, 1);
+                setPage(totalPages);
+            }
 
-            def show_next_5():
-                nonlocal visible_start
-                visible_start += 5
-                set_page(visible_start)
+            renderPage();
+        }
 
-            def show_prev_5():
-                nonlocal visible_start
-                visible_start -= 5
-                set_page(visible_start)
-
-            def show_first():
-                nonlocal visible_start
-                visible_start = 1
-                set_page(1)
-
-            def show_last():
-                nonlocal visible_start
-                visible_start = max(total_pages - 4, 1)
-                set_page(total_pages)
-
-            render_page()
-
-        file_data = await load_file("file.tsv")
-        file_data.insert(0, ["user_id","item_id","rating","timestamp"])
-        render_table(file_data, "file-table", "file-pagination")
-
-        movie_data = await load_file("Movie_Id_Titles.csv")
-        render_table(movie_data, "movie-table", "movie-pagination")
-    </py-script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const movieData = await loadCSV('./datasets/Movie_Id_Titles_Enhanced.csv');
+            renderTable(movieData, 'movie-table', 'movie-pagination');
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </body>
 </html>
